@@ -1,0 +1,52 @@
+{
+  "asOf": "2026-04-30",
+  "baseCurrency": "USD",
+  "totalMarketValue": 500000000,
+  "holdings": [
+    { "cusip": "912828ZT0", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 1.625, "maturityDate": "2026-11-15", "marketValue": 22000000, "yieldToMaturity": 4.42, "duration": 0.6 },
+    { "cusip": "91282CFE3", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.125, "maturityDate": "2027-09-30", "marketValue": 28000000, "yieldToMaturity": 4.18, "duration": 1.4 },
+    { "cusip": "91282CGT8", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.500, "maturityDate": "2029-05-31", "marketValue": 26000000, "yieldToMaturity": 4.05, "duration": 2.9 },
+    { "cusip": "91282CHM1", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.250, "maturityDate": "2031-02-15", "marketValue": 21000000, "yieldToMaturity": 4.12, "duration": 4.4 },
+    { "cusip": "91282CJL1", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.000, "maturityDate": "2033-08-15", "marketValue": 18000000, "yieldToMaturity": 4.20, "duration": 6.1 },
+    { "cusip": "912810TT0", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 3.625, "maturityDate": "2043-05-15", "marketValue": 15000000, "yieldToMaturity": 4.40, "duration": 13.2 },
+    { "cusip": "912810TX1", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.750, "maturityDate": "2053-11-15", "marketValue": 12000000, "yieldToMaturity": 4.55, "duration": 16.8 },
+    { "cusip": "9128285M8", "issuer": "US Treasury TIPS",                  "sector": "Treasury", "rating": "AAA", "coupon": 0.625, "maturityDate": "2030-01-15", "marketValue": 14000000, "yieldToMaturity": 1.95, "duration": 3.6 },
+
+    { "cusip": "3133EPHJ1", "issuer": "Federal Farm Credit Bank",          "sector": "Agency",   "rating": "AAA", "coupon": 4.875, "maturityDate": "2028-04-12", "marketValue": 9000000,  "yieldToMaturity": 4.32, "duration": 2.1 },
+    { "cusip": "3130AVQR4", "issuer": "Federal Home Loan Bank",            "sector": "Agency",   "rating": "AAA", "coupon": 4.500, "maturityDate": "2029-09-21", "marketValue": 8500000,  "yieldToMaturity": 4.28, "duration": 3.2 },
+    { "cusip": "3135G0X24", "issuer": "Fannie Mae",                        "sector": "Agency",   "rating": "AAA", "coupon": 5.000, "maturityDate": "2032-01-15", "marketValue": 7500000,  "yieldToMaturity": 4.46, "duration": 5.0 },
+    { "cusip": "3137EAEU9", "issuer": "Freddie Mac",                       "sector": "Agency",   "rating": "AAA", "coupon": 4.375, "maturityDate": "2033-06-26", "marketValue": 7000000,  "yieldToMaturity": 4.55, "duration": 6.0 },
+
+    { "cusip": "037833DT4", "issuer": "Apple Inc",                         "sector": "IG Corp",  "rating": "AA",  "coupon": 4.500, "maturityDate": "2030-02-09", "marketValue": 16000000, "yieldToMaturity": 4.62, "duration": 3.5 },
+    { "cusip": "594918BP8", "issuer": "Microsoft Corp",                    "sector": "IG Corp",  "rating": "AAA", "coupon": 3.700, "maturityDate": "2028-08-08", "marketValue": 15000000, "yieldToMaturity": 4.35, "duration": 2.4 },
+    { "cusip": "478160CN2", "issuer": "Johnson & Johnson",                 "sector": "IG Corp",  "rating": "AAA", "coupon": 4.875, "maturityDate": "2034-11-08", "marketValue": 12000000, "yieldToMaturity": 4.78, "duration": 7.0 },
+    { "cusip": "46625HJD3", "issuer": "JPMorgan Chase",                    "sector": "IG Corp",  "rating": "A",   "coupon": 5.125, "maturityDate": "2031-01-23", "marketValue": 14000000, "yieldToMaturity": 5.14, "duration": 4.5 },
+    { "cusip": "06051GHX7", "issuer": "Bank of America",                   "sector": "IG Corp",  "rating": "A",   "coupon": 4.950, "maturityDate": "2030-07-22", "marketValue": 11000000, "yieldToMaturity": 5.22, "duration": 3.9 },
+    { "cusip": "38141GZP6", "issuer": "Goldman Sachs",                     "sector": "IG Corp",  "rating": "BBB", "coupon": 5.450, "maturityDate": "2032-04-15", "marketValue": 9500000,  "yieldToMaturity": 5.52, "duration": 5.2 },
+    { "cusip": "166764BL3", "issuer": "Chevron Corp",                      "sector": "IG Corp",  "rating": "AA",  "coupon": 4.250, "maturityDate": "2029-11-15", "marketValue": 8500000,  "yieldToMaturity": 4.71, "duration": 3.4 },
+    { "cusip": "30231GBJ4", "issuer": "Exxon Mobil",                       "sector": "IG Corp",  "rating": "AA",  "coupon": 4.227, "maturityDate": "2031-03-19", "marketValue": 8000000,  "yieldToMaturity": 4.69, "duration": 4.8 },
+    { "cusip": "92826CAH4", "issuer": "Visa Inc",                          "sector": "IG Corp",  "rating": "AA",  "coupon": 3.150, "maturityDate": "2030-12-14", "marketValue": 7500000,  "yieldToMaturity": 4.62, "duration": 4.4 },
+    { "cusip": "57636QAW4", "issuer": "Mastercard",                        "sector": "IG Corp",  "rating": "AA",  "coupon": 3.350, "maturityDate": "2031-03-26", "marketValue": 6500000,  "yieldToMaturity": 4.65, "duration": 4.7 },
+    { "cusip": "713448DR3", "issuer": "PepsiCo Inc",                       "sector": "IG Corp",  "rating": "A",   "coupon": 3.900, "maturityDate": "2032-07-18", "marketValue": 6000000,  "yieldToMaturity": 4.83, "duration": 5.5 },
+    { "cusip": "191216CL2", "issuer": "Coca-Cola Co",                      "sector": "IG Corp",  "rating": "A",   "coupon": 3.450, "maturityDate": "2030-03-25", "marketValue": 5500000,  "yieldToMaturity": 4.71, "duration": 4.0 },
+    { "cusip": "931142EX0", "issuer": "Walmart Inc",                       "sector": "IG Corp",  "rating": "AA",  "coupon": 3.950, "maturityDate": "2032-09-09", "marketValue": 7000000,  "yieldToMaturity": 4.66, "duration": 5.6 },
+    { "cusip": "00287YDM7", "issuer": "AbbVie Inc",                        "sector": "IG Corp",  "rating": "BBB", "coupon": 4.700, "maturityDate": "2034-06-11", "marketValue": 7500000,  "yieldToMaturity": 5.18, "duration": 6.7 },
+
+    { "cusip": "29278NAU3", "issuer": "Energy Transfer LP",                "sector": "HY Corp",  "rating": "BB",  "coupon": 6.500, "maturityDate": "2030-04-15", "marketValue": 5500000,  "yieldToMaturity": 6.85, "duration": 3.7 },
+    { "cusip": "00164VAH4", "issuer": "AMC Networks",                      "sector": "HY Corp",  "rating": "B",   "coupon": 7.500, "maturityDate": "2028-08-15", "marketValue": 4500000,  "yieldToMaturity": 9.20, "duration": 2.7 },
+    { "cusip": "126650CX0", "issuer": "CVR Energy",                        "sector": "HY Corp",  "rating": "B",   "coupon": 8.500, "maturityDate": "2029-01-15", "marketValue": 4000000,  "yieldToMaturity": 8.95, "duration": 3.0 },
+    { "cusip": "759509AS4", "issuer": "Reinsurance Group",                 "sector": "HY Corp",  "rating": "BB",  "coupon": 7.000, "maturityDate": "2031-06-15", "marketValue": 5000000,  "yieldToMaturity": 7.10, "duration": 4.7 },
+    { "cusip": "82968BAB4", "issuer": "Sirius XM Radio",                   "sector": "HY Corp",  "rating": "BB",  "coupon": 5.500, "maturityDate": "2029-07-01", "marketValue": 4500000,  "yieldToMaturity": 6.60, "duration": 3.3 },
+    { "cusip": "46625UAB1", "issuer": "JBS USA Lux",                       "sector": "HY Corp",  "rating": "BB",  "coupon": 6.750, "maturityDate": "2034-03-15", "marketValue": 4000000,  "yieldToMaturity": 6.95, "duration": 6.4 },
+
+    { "cusip": "64971WLT3", "issuer": "New York City GO",                  "sector": "Muni",     "rating": "AA",  "coupon": 4.000, "maturityDate": "2034-08-01", "marketValue": 6500000,  "yieldToMaturity": 3.85, "duration": 6.8 },
+    { "cusip": "13063DGA0", "issuer": "California State GO",               "sector": "Muni",     "rating": "AA",  "coupon": 3.500, "maturityDate": "2032-10-01", "marketValue": 5500000,  "yieldToMaturity": 3.62, "duration": 5.6 },
+    { "cusip": "20772JJL5", "issuer": "Connecticut State GO",              "sector": "Muni",     "rating": "AA",  "coupon": 4.250, "maturityDate": "2036-03-15", "marketValue": 4500000,  "yieldToMaturity": 4.05, "duration": 7.9 },
+    { "cusip": "882723QR2", "issuer": "Texas Permanent School Fund",       "sector": "Muni",     "rating": "AAA", "coupon": 3.250, "maturityDate": "2030-08-15", "marketValue": 3500000,  "yieldToMaturity": 3.40, "duration": 4.2 },
+
+    { "cusip": "31418DTU2", "issuer": "FNMA Pool BR1234",                  "sector": "MBS",      "rating": "AAA", "coupon": 5.500, "maturityDate": "2053-09-01", "marketValue": 11000000, "yieldToMaturity": 5.20, "duration": 6.0 },
+    { "cusip": "3140Q5JB7", "issuer": "FNMA Pool MA4567",                  "sector": "MBS",      "rating": "AAA", "coupon": 4.500, "maturityDate": "2052-04-01", "marketValue": 9000000,  "yieldToMaturity": 5.05, "duration": 6.4 },
+    { "cusip": "31419MTQ6", "issuer": "FHLMC Pool QC8901",                 "sector": "MBS",      "rating": "AAA", "coupon": 6.000, "maturityDate": "2054-01-01", "marketValue": 8000000,  "yieldToMaturity": 5.40, "duration": 5.5 },
+    { "cusip": "3620A8K34", "issuer": "GNMA Pool AB5612",                  "sector": "MBS",      "rating": "AAA", "coupon": 5.000, "maturityDate": "2053-06-15", "marketValue": 6500000,  "yieldToMaturity": 5.10, "duration": 6.2 }
+  ]
+}

@@ -1,0 +1,82 @@
+@source "../../src/app/*.tsx";
+@source "../../src/components/chat/*.tsx";
+@source "../../src/components/render/*.tsx";
+@source "../../src/lib/*.ts";
+@source "../../src/lib/*/*.ts";
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d0e10;
+  --color-surface: #141614;
+  --color-surface-2: #1a1d1b;
+  --color-surface-3: #232823;
+  --color-border: #2a302d;
+  --color-border-strong: #3b4540;
+  --color-fg: #eceee9;
+  --color-fg-muted: #a6ada5;
+  --color-fg-dim: #697168;
+  --color-accent: #8bd3c7;
+  --color-accent-2: #f0b86c;
+  --color-positive: #74d680;
+  --color-negative: #ff7a7a;
+  --color-warning: #f0b86c;
+
+  --color-chart-1: #8bd3c7;
+  --color-chart-2: #f0b86c;
+  --color-chart-3: #8aa8ff;
+  --color-chart-4: #d88cff;
+  --color-chart-5: #74d680;
+  --color-chart-6: #ff7a7a;
+  --color-chart-7: #78c6ff;
+  --color-chart-8: #e4d36a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Inter", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+html, body {
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+}
+
+.thin-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--color-bg);
+}
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+.pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 0%,
+    var(--color-surface-3) 50%,
+    var(--color-surface-2) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s linear infinite;
+}

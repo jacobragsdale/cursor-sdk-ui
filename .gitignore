@@ -1,0 +1,17 @@
+node_modules
+.next
+
+# Local secrets and environment overrides
+.env*
+!.env.example
+
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+.workspace/*
+!.workspace/.keep
+.claude/settings.local.json
+
+# Nested reference repo; keep out of the app repository unless flattened intentionally.
+references/cookbook/
