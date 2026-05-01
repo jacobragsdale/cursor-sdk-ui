@@ -52,6 +52,17 @@ Optional:
 CURSOR_MODEL=composer-2
 ```
 
+Corporate proxy, VPN, or TLS-inspection profile:
+
+```bash
+CURSOR_USE_HTTP1=true
+HTTPS_PROXY=http://proxy-host:port
+HTTP_PROXY=http://proxy-host:port
+NO_PROXY=localhost,127.0.0.1,::1
+# If TLS inspection is enabled:
+# NODE_EXTRA_CA_CERTS=/path/to/corporate-root-ca.pem
+```
+
 If `CURSOR_API_KEY` is missing, the UI should show a polished inline error. Do not silently fall back to fake data.
 
 ## Architecture Map
@@ -72,9 +83,16 @@ If `CURSOR_API_KEY` is missing, the UI should show a polished inline error. Do n
 - `src/lib/agent/server.ts`
   - Cursor SDK agent lifecycle.
   - Per-session agent cache and active run registry.
+  - Dynamically imports `@cursor/sdk` only after SDK network bootstrap is initialized.
   - Maps Cursor SDK stream events into the app's `AgentStreamEvent` union.
   - Normalizes MCP-wrapped tool calls, especially `event.name === "mcp"` with `event.args.toolName`.
   - Validates `render_*` MCP args before emitting `render` events.
+
+- `src/lib/agent/network.ts`
+  - Idempotent corporate-network bootstrap for the SDK.
+  - Requires `CURSOR_USE_HTTP1=true` when proxy env vars are configured.
+  - Registers Undici `EnvHttpProxyAgent` for SDK `fetch()` calls and `global-agent` for Node `http`/`https` transports.
+  - Keeps `NO_PROXY` including `localhost,127.0.0.1,::1`.
 
 - `src/lib/agent/system-prompt.ts`
   - Agent operating instructions.
@@ -160,10 +178,11 @@ For browser verification:
 - Narrow viewport should keep header, summary strip, chart, legend, and prompt usable.
 - Prompt send and stop buttons should switch state while streaming.
 - Missing or invalid `CURSOR_API_KEY` should show a clear inline error.
+- Corporate-network failures should produce clear inline guidance for `CURSOR_USE_HTTP1`, proxy env vars, or `NODE_EXTRA_CA_CERTS`.
 
 ## Known Quirks
 
 - The Cursor model may still produce occasional prose. The client filters obvious process narration, but the system prompt is the first line of defense.
 - `references/sdk-typescript.md` is checked in as local SDK reference material.
 - `references/cookbook/` exists locally but is ignored because it is a nested Git repo.
-- The app uses `npx -y tsx src/lib/mcp/server.ts` for the MCP stdio server. If startup breaks, check Node/npm availability and the MCP entry path first.
+- The app uses `process.execPath` with the local `tsx/cli` entry for the MCP stdio server. If startup breaks, check Node availability, `node_modules/tsx`, and the MCP entry path first.

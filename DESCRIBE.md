@@ -136,11 +136,20 @@ Cancellation is handled by `POST /api/chat/cancel`, which calls `run.cancel()` f
 - local cwd set to `.workspace`
 - one stdio MCP server named `portfolio`
 
+Before dynamically importing `@cursor/sdk`, `src/lib/agent/network.ts` installs the corporate-network bootstrap:
+
+- `CURSOR_USE_HTTP1=true` is required whenever `HTTP_PROXY` or `HTTPS_PROXY` is configured.
+- Undici `EnvHttpProxyAgent` is registered so SDK `fetch()` calls honor `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`.
+- `global-agent` is bootstrapped with the same standard proxy env vars so Node `http`/`https` request transports use the proxy.
+- `NO_PROXY` is normalized to include `localhost,127.0.0.1,::1`.
+
 The MCP server starts with:
 
 ```bash
-npx -y tsx src/lib/mcp/server.ts
+node node_modules/tsx/dist/cli.mjs src/lib/mcp/server.ts
 ```
+
+In code, that is launched as `process.execPath` plus the local `tsx/cli` entry, so runtime chat does not invoke `npx` or npm over the network.
 
 The agent cwd is intentionally an empty `.workspace/` directory. The system prompt tells the agent not to edit files, run shell commands, or start dev servers. In this app, the agent should only answer by calling portfolio MCP tools.
 
@@ -241,6 +250,17 @@ cp .env.example .env.local
 npm run dev
 ```
 
+Corporate proxy, VPN, or TLS-inspection profile:
+
+```bash
+CURSOR_USE_HTTP1=true
+HTTPS_PROXY=http://proxy-host:port
+HTTP_PROXY=http://proxy-host:port
+NO_PROXY=localhost,127.0.0.1,::1
+# If TLS inspection is enabled:
+# NODE_EXTRA_CA_CERTS=/path/to/corporate-root-ca.pem
+```
+
 Open:
 
 ```text
@@ -279,6 +299,7 @@ Suggested browser checks:
 - Data grid scrolls horizontally on narrow screens.
 - Prompt send button becomes stop button while streaming.
 - Missing API key produces a visible inline error rather than fake data.
+- Corporate-network failures explain whether to set `CURSOR_USE_HTTP1`, check `HTTP_PROXY`/`HTTPS_PROXY`, or provide `NODE_EXTRA_CA_CERTS`.
 
 ## Extension Ideas
 

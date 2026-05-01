@@ -32,6 +32,17 @@ echo 'CURSOR_API_KEY=your-key-here' > .env.local
 npm run dev
 ```
 
+For corporate proxy, VPN, or TLS-inspecting networks, add the HTTP/1.1 proxy profile before starting the dev server:
+
+```bash
+CURSOR_USE_HTTP1=true
+HTTPS_PROXY=http://proxy-host:port
+HTTP_PROXY=http://proxy-host:port
+NO_PROXY=localhost,127.0.0.1,::1
+# If TLS inspection is enabled:
+# NODE_EXTRA_CA_CERTS=/path/to/corporate-root-ca.pem
+```
+
 Open http://localhost:3000 and try:
 
 - "Show me the sector breakdown of the portfolio"
@@ -71,7 +82,7 @@ references/                        # SDK docs + cookbook (not built)
 When you submit a prompt:
 
 1. The browser opens an SSE connection to `/api/chat`.
-2. The route handler retrieves (or creates) a `SDKAgent` for the session, prepends the system prompt, and calls `agent.send()`.
+2. The route handler configures proxy-aware SDK networking, retrieves (or creates) a `SDKAgent` for the session, prepends the system prompt, and calls `agent.send()`.
 3. As `run.stream()` yields events, the route maps them to a typed `AgentStreamEvent`:
    - `assistant` text → `assistant_delta`
    - `thinking` → `thinking`
@@ -79,4 +90,4 @@ When you submit a prompt:
    - `tool_call` for a data tool / `status` / `task` → `activity` row
 4. The browser parses each event and updates the conversation state, so charts and tables appear inline as the agent runs.
 
-The agent's `cwd` points at an empty `.workspace/` directory and the system prompt forbids file edits and shell commands — it should only call MCP tools.
+The agent's `cwd` points at an empty `.workspace/` directory and the system prompt forbids file edits and shell commands — it should only call MCP tools. The local MCP server is launched with the repo's installed `tsx` CLI through `process.execPath`, so chat runtime does not invoke npm over the network.

@@ -1,14 +1,16 @@
 import path from "node:path";
 import type { SDKAgent, SDKMessage, Run } from "@cursor/sdk";
-import { Agent } from "@cursor/sdk";
 import { RenderSpecByName, isRenderToolName, type RenderToolName } from "../render-schemas";
 import type { AgentStreamEvent } from "../types";
+import { initializeSdkNetwork } from "./network";
 import { buildPrompt } from "./system-prompt";
 
 const WORKSPACE = path.resolve(process.cwd(), ".workspace");
 const MCP_SERVER_ENTRY = path.resolve(process.cwd(), "src/lib/mcp/server.ts");
+const TSX_CLI_ENTRY = path.resolve(process.cwd(), "node_modules/tsx/dist/cli.mjs");
 const MODEL_ID = process.env.CURSOR_MODEL ?? "composer-2";
 const normalizedToolCalls = new Map<string, { name: string; args: unknown }>();
+let cursorSdk: Promise<typeof import("@cursor/sdk")> | undefined;
 
 interface Session {
   agent: SDKAgent;
@@ -38,6 +40,7 @@ export async function getOrCreateAgent(sessionId: string): Promise<Session> {
   }
 
   const created = (async (): Promise<Session> => {
+    const { Agent } = await loadCursorSdk();
     const agent = await Agent.create({
       apiKey,
       name: `Portfolio analyst ${sessionId.slice(0, 6)}`,
@@ -46,8 +49,8 @@ export async function getOrCreateAgent(sessionId: string): Promise<Session> {
       mcpServers: {
         portfolio: {
           type: "stdio",
-          command: "npx",
-          args: ["-y", "tsx", MCP_SERVER_ENTRY],
+          command: process.execPath,
+          args: [TSX_CLI_ENTRY, MCP_SERVER_ENTRY],
           cwd: process.cwd(),
         },
       },
@@ -69,15 +72,18 @@ export async function streamAgentResponse(
   userMessage: string,
   emit: (event: AgentStreamEvent) => void,
 ): Promise<void> {
-  const session = await getOrCreateAgent(sessionId);
-
-  const run = await session.agent.send(buildPrompt(userMessage));
-  session.currentRun = run;
-  runRegistry.set(sessionId, run);
-
-  emit({ type: "session", sessionId, runId: run.id });
+  let session: Session | undefined;
+  let run: Run | null = null;
 
   try {
+    session = await getOrCreateAgent(sessionId);
+
+    run = await session.agent.send(buildPrompt(userMessage));
+    session.currentRun = run;
+    runRegistry.set(sessionId, run);
+
+    emit({ type: "session", sessionId, runId: run.id });
+
     for await (const event of run.stream()) {
       forwardSdkMessage(event, emit);
     }
@@ -86,12 +92,12 @@ export async function streamAgentResponse(
   } catch (err) {
     emit({
       type: "error",
-      message: err instanceof Error ? err.message : String(err),
+      message: friendlyAgentError(err),
     });
     emit({ type: "done", status: "error" });
   } finally {
-    if (runRegistry.get(sessionId) === run) runRegistry.delete(sessionId);
-    if (session.currentRun === run) session.currentRun = null;
+    if (run && runRegistry.get(sessionId) === run) runRegistry.delete(sessionId);
+    if (run && session?.currentRun === run) session.currentRun = null;
   }
 }
 
@@ -185,6 +191,69 @@ function forwardSdkMessage(
     default:
       return;
   }
+}
+
+function loadCursorSdk(): Promise<typeof import("@cursor/sdk")> {
+  initializeSdkNetwork();
+  return (cursorSdk ??= import("@cursor/sdk"));
+}
+
+function friendlyAgentError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("CURSOR_API_KEY")) return message;
+
+  const code = isRecord(error) ? getString(error.code) : undefined;
+  const normalized = `${message} ${code ?? ""}`.toLowerCase();
+
+  if (isCertificateFailure(normalized)) {
+    return "Cursor could not verify the TLS certificate chain. If your network inspects TLS, set NODE_EXTRA_CA_CERTS to your corporate root CA bundle and restart the dev server; do not disable TLS verification.";
+  }
+
+  if (isHttp2Failure(normalized)) {
+    return "The Cursor SDK connection hit an HTTP/2 or protocol error. Set CURSOR_USE_HTTP1=true and restart the dev server for proxy, VPN, or Zscaler-style networks.";
+  }
+
+  if (isProxyFailure(normalized)) {
+    return "Cursor could not connect through the configured proxy. Check HTTPS_PROXY, HTTP_PROXY, and NO_PROXY, then restart the dev server.";
+  }
+
+  return message;
+}
+
+function isCertificateFailure(message: string): boolean {
+  return [
+    "self_signed_cert_in_chain",
+    "unable_to_verify_leaf_signature",
+    "unable to verify the first certificate",
+    "self signed certificate",
+    "certificate has expired",
+    "cert_has_expired",
+  ].some((pattern) => message.includes(pattern));
+}
+
+function isHttp2Failure(message: string): boolean {
+  return [
+    "http/2",
+    "http2",
+    "err_http2",
+    "rst_stream",
+    "protocol error",
+    "stream closed",
+  ].some((pattern) => message.includes(pattern));
+}
+
+function isProxyFailure(message: string): boolean {
+  return [
+    "proxy",
+    "connect econnrefused",
+    "connect etimedout",
+    "connect ehostunreach",
+    "connect enetunreach",
+    "econnreset",
+    "enotfound",
+    "eai_again",
+    "socket hang up",
+  ].some((pattern) => message.includes(pattern));
 }
 
 interface NormalizedToolCall {

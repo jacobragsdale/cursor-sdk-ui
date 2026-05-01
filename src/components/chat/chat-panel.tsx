@@ -325,11 +325,38 @@ function appendActivity(
 }
 
 function friendlyErrorMessage(message: string): string {
+  const normalized = message.toLowerCase();
   if (message.includes("CURSOR_API_KEY")) {
     return "Cursor API key is not configured. Add CURSOR_API_KEY to .env.local and restart the dev server.";
   }
-  if (message.toLowerCase().includes("unauthorized") || message.toLowerCase().includes("forbidden")) {
+  if (normalized.includes("unauthorized") || normalized.includes("forbidden")) {
     return "Cursor rejected the request. Check that CURSOR_API_KEY is valid and has access to the selected model.";
+  }
+  if (
+    normalized.includes("self_signed_cert_in_chain") ||
+    normalized.includes("unable_to_verify_leaf_signature") ||
+    normalized.includes("unable to verify the first certificate") ||
+    normalized.includes("self signed certificate")
+  ) {
+    return "Cursor could not verify the TLS certificate chain. If your network inspects TLS, set NODE_EXTRA_CA_CERTS to your corporate root CA bundle and restart the dev server; do not disable TLS verification.";
+  }
+  if (
+    normalized.includes("http/2") ||
+    normalized.includes("http2") ||
+    normalized.includes("err_http2") ||
+    normalized.includes("rst_stream") ||
+    normalized.includes("protocol error")
+  ) {
+    return "The Cursor SDK connection hit an HTTP/2 or protocol error. Set CURSOR_USE_HTTP1=true and restart the dev server for proxy, VPN, or Zscaler-style networks.";
+  }
+  if (
+    normalized.includes("proxy") ||
+    normalized.includes("connect econnrefused") ||
+    normalized.includes("connect etimedout") ||
+    normalized.includes("econnreset") ||
+    normalized.includes("enotfound")
+  ) {
+    return "Cursor could not connect through the configured proxy. Check HTTPS_PROXY, HTTP_PROXY, and NO_PROXY, then restart the dev server.";
   }
   return message;
 }
