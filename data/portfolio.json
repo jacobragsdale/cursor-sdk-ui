@@ -2,6 +2,13 @@
   "asOf": "2026-04-30",
   "baseCurrency": "USD",
   "totalMarketValue": 500000000,
+  "state": "NY",
+  "federalTaxRate": 37.0,
+  "stateTaxRate": 6.85,
+  "accountType": "Taxable",
+  "investorType": "High Net Worth Individual",
+  "benchmarkIndex": "Bloomberg US Aggregate Bond Index",
+  "inceptionDate": "2021-03-01",
   "holdings": [
     { "cusip": "912828ZT0", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 1.625, "maturityDate": "2026-11-15", "marketValue": 22000000, "yieldToMaturity": 4.42, "duration": 0.6 },
     { "cusip": "91282CFE3", "issuer": "US Treasury",                       "sector": "Treasury", "rating": "AAA", "coupon": 4.125, "maturityDate": "2027-09-30", "marketValue": 28000000, "yieldToMaturity": 4.18, "duration": 1.4 },

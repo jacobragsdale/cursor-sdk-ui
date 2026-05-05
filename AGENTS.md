@@ -44,6 +44,7 @@ Create `.env.local` locally:
 
 ```bash
 CURSOR_API_KEY=your-key-from-cursor-dashboard
+PORTFOLIO_PASSWORD=your-local-workspace-password
 ```
 
 Optional:

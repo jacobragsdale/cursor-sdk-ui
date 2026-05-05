@@ -1,12 +1,21 @@
 import { ChatPanel } from "@/components/chat/chat-panel";
+import { AUTH_COOKIE_NAME, isValidAuthToken } from "@/lib/auth";
+import { logout } from "@/lib/auth-actions";
 import { portfolioSummary } from "@/lib/mcp/data";
 import { formatNumber } from "@/lib/utils";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const MODEL_ID = process.env.CURSOR_MODEL ?? "composer-2";
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
+export default async function Page() {
+  const cookieStore = await cookies();
+  if (!isValidAuthToken(cookieStore.get(AUTH_COOKIE_NAME)?.value)) {
+    redirect("/login");
+  }
+
   const summary = portfolioSummary();
   const apiKeyConfigured = Boolean(process.env.CURSOR_API_KEY);
   const asOf = new Intl.DateTimeFormat("en-US", {
@@ -47,6 +56,14 @@ export default function Page() {
               >
                 {apiKeyConfigured ? "Live SDK connected" : "API key missing"}
               </span>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1 text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
+                >
+                  Sign out
+                </button>
+              </form>
             </div>
           </div>
           <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">

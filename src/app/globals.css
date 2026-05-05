@@ -1,4 +1,4 @@
-@source "../../src/app/*.tsx";
+@source "../../src/app/**/*.tsx";
 @source "../../src/components/chat/*.tsx";
 @source "../../src/components/render/*.tsx";
 @source "../../src/lib/*.ts";

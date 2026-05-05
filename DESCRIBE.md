@@ -246,7 +246,7 @@ Do not casually collapse these into a recursive glob unless you verify the gener
 ```bash
 npm install
 cp .env.example .env.local
-# edit .env.local and set CURSOR_API_KEY
+# edit .env.local and set CURSOR_API_KEY and PORTFOLIO_PASSWORD
 npm run dev
 ```
 

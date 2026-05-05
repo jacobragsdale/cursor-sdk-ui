@@ -21,6 +21,13 @@ export interface Portfolio {
   asOf: string;
   baseCurrency: string;
   totalMarketValue: number;
+  state: string;
+  federalTaxRate: number;
+  stateTaxRate: number;
+  accountType: string;
+  investorType: string;
+  benchmarkIndex: string;
+  inceptionDate: string;
   holdings: Holding[];
 }
 
@@ -62,6 +69,13 @@ export function portfolioSummary() {
     weightedYieldToMaturity: round(weightedYtm, 3),
     weightedDuration: round(weightedDuration, 2),
     weightedCoupon: round(weightedCoupon, 3),
+    state: p.state,
+    federalTaxRate: p.federalTaxRate,
+    stateTaxRate: p.stateTaxRate,
+    accountType: p.accountType,
+    investorType: p.investorType,
+    benchmarkIndex: p.benchmarkIndex,
+    inceptionDate: p.inceptionDate,
   };
 }
 
