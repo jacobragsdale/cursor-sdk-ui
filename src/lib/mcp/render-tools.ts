@@ -1,5 +1,5 @@
 import {
-  BarChartSpec,
+  BarChartSpecObject,
   DataGridSpec,
   KpiCardSpec,
   LineChartSpec,
@@ -26,8 +26,8 @@ export const renderTools = [
   {
     name: "render_bar_chart",
     description:
-      "Render a bar chart inline. Use for comparing categories (sector allocation, rating distribution, maturity buckets). Pass `xKey` (category field), `yKey` (numeric field), `data` (array of objects), and optionally `orientation`. The chart appears in the chat — describe insights only.",
-    schema: BarChartSpec,
+      "Render a bar chart inline. Use for comparing categories (sector allocation, rating distribution, maturity buckets). Pass `xKey` (category field), `yKey` (numeric field), `data` (array of objects), and optionally `xLabel`, `yLabel`, and `orientation`. Prefer `orientation: \"horizontal\"` when category names are long. The chart appears in the chat — describe insights only.",
+    schema: BarChartSpecObject,
     handler: async () => ack,
   },
   {

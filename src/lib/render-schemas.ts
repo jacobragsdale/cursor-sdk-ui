@@ -30,14 +30,36 @@ export type DataGridSpec = z.infer<typeof DataGridSpec>;
 
 const chartDatum = z.record(z.string(), z.union([z.string(), z.number()]));
 
-export const BarChartSpec = z.object({
+export const BarChartSpecObject = z.object({
   title: z.string().optional(),
   xKey: z.string().min(1),
   yKey: z.string().min(1),
+  xLabel: z.string().optional(),
+  yLabel: z.string().optional(),
   data: z.array(chartDatum).min(1),
   orientation: z.enum(["vertical", "horizontal"]).optional(),
   yFormat: numberFormat.optional(),
   caption: z.string().optional(),
+});
+
+export const BarChartSpec = BarChartSpecObject.superRefine((spec, ctx) => {
+  for (let i = 0; i < spec.data.length; i++) {
+    const row = spec.data[i];
+    if (!(spec.xKey in row)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["data", i, spec.xKey],
+        message: `xKey "${spec.xKey}" missing from data[${i}]`,
+      });
+    }
+    if (typeof row[spec.yKey] !== "number") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["data", i, spec.yKey],
+        message: `yKey "${spec.yKey}" at data[${i}] must be a number`,
+      });
+    }
+  }
 });
 export type BarChartSpec = z.infer<typeof BarChartSpec>;
 
