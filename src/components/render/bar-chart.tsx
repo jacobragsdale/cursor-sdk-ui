@@ -4,6 +4,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -61,7 +62,11 @@ export function BarChartBlock({ spec }: { spec: BarChartSpec }) {
             dataKey={spec.yKey}
             fill={CHART_COLORS[0]}
             radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]}
-          />
+          >
+            {spec.data.map((_, idx) => (
+              <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
       </div>

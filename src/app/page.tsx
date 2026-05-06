@@ -32,14 +32,14 @@ export default async function Page() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-[var(--color-accent)]/35 bg-[var(--color-accent)]/12 text-sm font-semibold text-[var(--color-accent)]">
-                FI
+                NY
               </div>
               <div className="min-w-0 leading-tight">
                 <div className="truncate text-sm font-semibold tracking-tight">
-                  Fixed-Income Portfolio Agent
+                  Muni SMA Analyst
                 </div>
                 <div className="truncate text-[11px] text-[var(--color-fg-dim)]">
-                  Portfolio management workspace · data as of {asOf}
+                  NY taxable investor workspace · data as of {asOf}
                 </div>
               </div>
             </div>
@@ -68,8 +68,8 @@ export default async function Page() {
           </div>
           <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <SummaryMetric label="Market value" value={formatNumber(summary.totalMarketValue, "currency")} />
-            <SummaryMetric label="Holdings" value={formatNumber(summary.holdingsCount, "number", 0)} />
-            <SummaryMetric label="YTM" value={formatNumber(summary.weightedYieldToMaturity, "percent", 2)} />
+            <SummaryMetric label="NY weight" value={formatNumber(summary.nyWeight, "percent", 2)} />
+            <SummaryMetric label="Tax-equiv YTW" value={formatNumber(summary.weightedTaxEquivalentYield, "percent", 2)} />
             <SummaryMetric label="Duration" value={formatNumber(summary.weightedDuration, "decimal", 2)} />
           </dl>
         </div>

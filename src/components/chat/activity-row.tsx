@@ -58,10 +58,24 @@ function humanize(name?: string): string {
   if (name === "analysis") return "Analysis";
   if (name === "get_portfolio_summary") return "Reading portfolio summary";
   if (name === "list_holdings") return "Listing holdings";
-  if (name === "get_sector_allocation") return "Loading sector allocation";
+  if (name === "get_sector_allocation" || name === "get_muni_sector_exposure") return "Loading muni sector exposure";
+  if (name === "get_state_exposure") return "Loading state exposure";
   if (name === "get_rating_distribution") return "Loading rating distribution";
   if (name === "get_maturity_buckets") return "Loading maturity buckets";
   if (name === "get_duration_buckets") return "Loading duration buckets";
+  if (name === "get_tax_profile") return "Reading tax profile";
+  if (name === "get_tax_equivalent_yield") return "Calculating TEY";
+  if (name === "get_tax_lots") return "Reading tax lots";
+  if (name === "get_tax_loss_harvest_candidates") return "Finding harvest candidates";
+  if (name === "get_realized_gains_losses") return "Reading realized gains";
+  if (name === "get_trade_history") return "Reading trades";
+  if (name === "get_call_maturity_schedule") return "Loading call schedule";
+  if (name === "get_cash_flow_projection") return "Projecting cash flows";
+  if (name === "get_performance_vs_benchmark") return "Loading performance";
+  if (name === "run_rate_spread_scenario") return "Running shock scenario";
+  if (name === "get_credit_watchlist") return "Reading credit watchlist";
+  if (name === "get_guideline_checks") return "Checking guidelines";
+  if (name === "get_yield_curves") return "Loading yield curves";
   if (name.startsWith("render_")) return "Rendering";
   return name.replace(/_/g, " ");
 }

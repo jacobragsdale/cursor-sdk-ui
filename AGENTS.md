@@ -1,6 +1,6 @@
 # Agent Handoff Guide
 
-This repo is a Next.js demo app for a chat-first fixed-income portfolio analyst powered by the Cursor TypeScript SDK and a local MCP server. A new coding agent should be able to read this file, then `DESCRIBE.md`, and understand where to make changes without rediscovering the whole system.
+This repo is a Next.js demo app for a chat-first municipal SMA portfolio analyst for a synthetic NY taxable investor, powered by the Cursor TypeScript SDK and a local MCP server. A new coding agent should be able to read this file, then `DESCRIBE.md`, and understand where to make changes without rediscovering the whole system.
 
 ## First Principles
 
@@ -169,9 +169,11 @@ npm run build
 
 For UI or streaming changes, also smoke test `/api/chat` with:
 
-- `Show me the sector breakdown` should emit `render_pie_chart`.
-- `List the top 10 holdings by market value` should emit `render_data_grid` with 10 rows.
-- `What's our overall yield and duration?` should emit KPI cards.
+- `Show a pie chart of the portfolio by state.` should call `get_state_exposure` and emit `render_pie_chart`.
+- `Show a bar chart of muni sectors.` should call `get_muni_sector_exposure` or `get_sector_allocation` and emit `render_bar_chart`.
+- `Show a pie chart of credit ratings.` should call `get_rating_distribution` and emit `render_pie_chart`.
+- `Which states have the highest yields? Use a bar chart.` should call `get_tax_equivalent_yield` and emit `render_bar_chart`.
+- `Show the 10 biggest bonds in a table.` should call `list_holdings` and emit `render_data_grid`.
 
 For browser verification:
 

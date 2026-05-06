@@ -8,11 +8,11 @@ import { MessageList } from "./message-list";
 import { PromptInput } from "./prompt-input";
 
 const SUGGESTIONS = [
-  "Show me the sector breakdown",
-  "List the top 10 holdings by market value as a table",
-  "What's our overall yield and duration?",
-  "Compare AAA vs BBB exposure",
-  "How is the maturity profile distributed?",
+  "Show a pie chart of the portfolio by state.",
+  "Show a bar chart of muni sectors.",
+  "Show a pie chart of credit ratings.",
+  "Which states have the highest yields? Use a bar chart.",
+  "Show the 10 biggest bonds in a table.",
 ];
 
 interface ChatPanelProps {
@@ -168,7 +168,7 @@ function EmptyState({
           Ask the portfolio a question.
         </div>
         <div className="text-sm leading-6 text-[var(--color-fg-muted)]">
-          Start with allocation, credit quality, rate risk, yield, duration, or a holdings list.
+          Try a simple chart: state mix, muni sectors, credit ratings, yields, or biggest bonds.
         </div>
       </div>
       {!apiKeyConfigured && (

@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Portfolio Agent is a chat-first fixed-income portfolio demo. A portfolio manager can ask natural-language questions like "Show me the sector breakdown" or "List the top 10 holdings by market value," and the app streams back live analyst activity plus inline charts, tables, and KPI cards.
+Portfolio Agent is a chat-first municipal SMA portfolio demo for a synthetic NY taxable investor. A portfolio manager can ask natural-language questions like "Show a pie chart of the portfolio by state," "Show a bar chart of muni sectors," or "Which states have the highest yields?", and the app streams back live analyst activity plus inline charts, tables, and KPI cards.
 
 The app is built with:
 
@@ -33,8 +33,8 @@ The portfolio is synthetic and bundled in the repo. This is not a production por
 The first screen is the workspace:
 
 - Header with product identity, model status, and API-key status.
-- Portfolio summary strip with market value, holdings count, weighted yield, and duration.
-- Empty-state prompt chips for common PM questions.
+- Portfolio summary strip with market value, NY sourced weight, tax-equivalent yield, and duration.
+- Empty-state prompt chips for muni SMA workflows such as TEY, tax lots, calls, trades, and shock scenarios.
 - Chat prompt pinned at the bottom.
 - Conversation area where user prompts, activity rows, charts, tables, and summaries appear inline.
 
@@ -50,26 +50,53 @@ The intended interaction model is:
 
 The only portfolio data source is `data/portfolio.json`.
 
-Top-level fields:
+Important top-level fields:
 
 - `asOf`
 - `baseCurrency`
 - `totalMarketValue`
 - `holdings`
+- `clientProfile`
+- `taxRules`
+- `benchmark`
+- `yieldCurves`
+- `performanceHistory`
+- `transactions`
+- `taxLots`
+- `cashFlows`
+- `riskScenarios`
+- `creditWatchlist`
+- `guidelines`
 
 Each holding includes:
 
 - `cusip`
 - `issuer`
 - `sector`
+- `state`
+- `issuerType`
+- `revenueSector`
+- `taxStatus`
+- `amtFlag`
+- `insured`
+- `callDate`
+- `callPrice`
+- `parValue`
+- `cleanPrice`
+- `costBasis`
+- `accruedInterest`
+- `unrealizedGainLoss`
 - `rating`
 - `coupon`
 - `maturityDate`
 - `marketValue`
 - `yieldToMaturity`
-- `duration`
+- `yieldToWorst`
+- `effectiveDuration`
+- `liquidityScore`
+- `creditOutlook`
 
-The `weight` field is computed in `src/lib/mcp/data.ts` from each holding's market value divided by total portfolio market value.
+The `weight`, `taxEquivalentYield`, and `amtAdjustedTaxEquivalentYield` fields are computed in `src/lib/mcp/data.ts` from the bundled holdings and mock tax profile.
 
 ## MCP Tools
 
@@ -82,9 +109,24 @@ Defined in `src/lib/mcp/data-tools.ts` and implemented in `src/lib/mcp/data.ts`:
 - `get_portfolio_summary`
 - `list_holdings`
 - `get_sector_allocation`
+- `get_state_exposure`
+- `get_muni_sector_exposure`
 - `get_rating_distribution`
 - `get_maturity_buckets`
 - `get_duration_buckets`
+- `get_tax_profile`
+- `get_tax_equivalent_yield`
+- `get_tax_lots`
+- `get_tax_loss_harvest_candidates`
+- `get_realized_gains_losses`
+- `get_trade_history`
+- `get_call_maturity_schedule`
+- `get_cash_flow_projection`
+- `get_performance_vs_benchmark`
+- `run_rate_spread_scenario`
+- `get_credit_watchlist`
+- `get_guideline_checks`
+- `get_yield_curves`
 
 These return JSON for the agent to reason over and for render tools to display.
 
@@ -109,7 +151,7 @@ Request body:
 ```json
 {
   "sessionId": "s_...",
-  "message": "Show me the sector breakdown"
+  "message": "Show a pie chart of the portfolio by state."
 }
 ```
 
@@ -213,12 +255,13 @@ The system prompt in `src/lib/agent/system-prompt.ts` is central to the demo.
 
 It instructs the model to:
 
-- Act as a fixed-income portfolio analyst.
+- Act as a municipal SMA portfolio analyst for a NY taxable investor.
 - Always call data tools before render tools.
 - Prefer charts, tables, and KPI cards over prose.
 - Avoid inventing numbers.
 - Avoid process narration like "I am rendering a chart."
 - Keep summaries short and PM-facing.
+- Use the bundled mock tax profile and avoid tax-advice language.
 
 If the demo starts producing noisy or tool-mechanical answers, check the prompt first and then the client-side text cleanup in `src/components/chat/chat-panel.tsx`.
 
@@ -269,11 +312,11 @@ http://localhost:3000
 
 Useful prompts:
 
-- "Show me the sector breakdown"
-- "List the top 10 holdings by market value"
-- "What's our overall yield and duration?"
-- "Compare AAA vs BBB exposure"
-- "How is the maturity profile distributed?"
+- "Show a pie chart of the portfolio by state."
+- "Show a bar chart of muni sectors."
+- "Show a pie chart of credit ratings."
+- "Which states have the highest yields? Use a bar chart."
+- "Show the 10 biggest bonds in a table."
 
 ## Verification
 
@@ -281,15 +324,18 @@ Basic checks:
 
 ```bash
 npm run typecheck
+npm run check:data
 npm run build
 npm run check
 ```
 
 Suggested API smoke tests:
 
-- Sector prompt should emit `render_pie_chart`.
-- Top holdings prompt should emit `render_data_grid` with 10 rows.
-- Yield/duration prompt should emit adjacent `render_kpi_card` events.
+- State pie prompt should call `get_state_exposure` and emit `render_pie_chart`.
+- Muni sector bar prompt should call `get_muni_sector_exposure` or `get_sector_allocation` and emit `render_bar_chart`.
+- Credit rating pie prompt should call `get_rating_distribution` and emit `render_pie_chart`.
+- Yield-by-state prompt should call `get_tax_equivalent_yield` and emit `render_bar_chart`.
+- Biggest-bonds prompt should call `list_holdings` and emit `render_data_grid`.
 
 Suggested browser checks:
 
@@ -305,8 +351,8 @@ Suggested browser checks:
 
 Good next steps:
 
-- Add more portfolio analytics tools, such as spread duration, convexity, issuer concentration, or OAS.
-- Add a time-series dataset and improve `render_line_chart` use cases.
+- Add more portfolio analytics tools, such as convexity, issuer concentration, and curve roll-down.
+- Expand the performance and cash-flow history and improve `render_line_chart` use cases.
 - Add a health endpoint with non-secret status: model id, data as-of date, and API-key configured boolean.
 - Add focused tests for MCP data aggregation functions.
 - Add ESLint once the project wants style checks beyond TypeScript.

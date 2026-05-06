@@ -1,6 +1,6 @@
-# Portfolio Agent
+# Muni SMA Analyst
 
-A chat-driven fixed-income portfolio dashboard powered by the [Cursor TypeScript SDK](https://cursor.com/docs/sdk/typescript). Ask questions in natural language; the agent fetches data through a custom MCP server and renders charts, tables, and KPI cards inline as part of its response.
+A chat-driven municipal SMA analyst workspace powered by the [Cursor TypeScript SDK](https://cursor.com/docs/sdk/typescript). Ask questions in natural language about a synthetic NY taxable investor portfolio; the agent fetches data through a custom MCP server and renders charts, tables, and KPI cards inline as part of its response.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ Browser  ──POST /api/chat──▶  Next.js route  ──▶  Cursor Agent (
                                               data/portfolio.json
 ```
 
-- **Data tools** (`get_portfolio_summary`, `list_holdings`, `get_sector_allocation`, …) return JSON for the agent to reason over.
+- **Data tools** (`get_portfolio_summary`, `list_holdings`, `get_tax_equivalent_yield`, `get_tax_loss_harvest_candidates`, `run_rate_spread_scenario`, …) return JSON for the agent to reason over.
 - **Render tools** (`render_pie_chart`, `render_data_grid`, `render_bar_chart`, `render_line_chart`, `render_kpi_card`) take a UI spec as their args. The frontend intercepts the tool-call event in the SSE stream, validates the spec with Zod, and mounts the matching React component inline in the chat.
 - The agent stays focused on planning + tool calls + summaries. The frontend stays focused on rendering React from validated specs.
 
@@ -25,8 +25,8 @@ Browser  ──POST /api/chat──▶  Next.js route  ──▶  Cursor Agent (
 # 1. Install
 npm install
 
-# 2. Add your Cursor API key (from https://cursor.com/dashboard/integrations)
-echo 'CURSOR_API_KEY=your-key-here' > .env.local
+# 2. Add your Cursor API key and local workspace password
+printf 'CURSOR_API_KEY=your-key-here\nPORTFOLIO_PASSWORD=choose-a-local-password\n' > .env.local
 
 # 3. Run
 npm run dev
@@ -45,11 +45,11 @@ NO_PROXY=localhost,127.0.0.1,::1
 
 Open http://localhost:3000 and try:
 
-- "Show me the sector breakdown of the portfolio"
-- "List the top 10 holdings by market value as a table"
-- "What's our overall yield and duration?"
-- "Compare AAA vs BBB exposure"
-- "How is the maturity profile distributed?"
+- "Show a pie chart of the portfolio by state."
+- "Show a bar chart of muni sectors."
+- "Show a pie chart of credit ratings."
+- "Which states have the highest yields? Use a bar chart."
+- "Show the 10 biggest bonds in a table."
 
 ## Project layout
 
@@ -72,7 +72,7 @@ src/
     ├── types.ts                   # AgentStreamEvent + AssistantBlock + ChatMessage unions
     └── utils.ts                   # cn(), formatNumber()
 
-data/portfolio.json                # ~40 dummy fixed-income holdings
+data/portfolio.json                # synthetic NY taxable muni SMA dataset
 .workspace/                        # Empty; the agent's cwd
 references/                        # SDK docs + cookbook (not built)
 ```

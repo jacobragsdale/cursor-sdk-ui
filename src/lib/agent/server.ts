@@ -347,9 +347,56 @@ function summarizeToolArgs(name: string, args: unknown): string | undefined {
       const parts: string[] = [];
       if (a.sector) parts.push(`sector=${a.sector}`);
       if (a.rating) parts.push(`rating=${a.rating}`);
+      if (a.state) parts.push(`state=${a.state}`);
+      if (a.revenueSector) parts.push(`muni=${a.revenueSector}`);
+      if (a.amtFlag != null) parts.push(`AMT=${a.amtFlag ? "yes" : "no"}`);
+      if (a.callable != null) parts.push(`callable=${a.callable ? "yes" : "no"}`);
       if (a.sortBy) parts.push(`sort=${a.sortBy}${a.sortDir ? ":" + a.sortDir : ""}`);
       if (a.limit) parts.push(`limit=${a.limit}`);
       return parts.length ? parts.join(" · ") : undefined;
+    }
+    case "get_tax_equivalent_yield": {
+      const parts: string[] = [];
+      if (a.groupBy) parts.push(`by=${a.groupBy}`);
+      if (a.limit) parts.push(`limit=${a.limit}`);
+      return parts.join(" · ") || undefined;
+    }
+    case "get_tax_lots":
+    case "get_tax_loss_harvest_candidates": {
+      const parts: string[] = [];
+      if (a.cusip) parts.push(`CUSIP=${a.cusip}`);
+      if (a.onlyLosses) parts.push("losses only");
+      if (a.minLossAmount) parts.push(`min loss=${a.minLossAmount}`);
+      if (a.minLossPercent) parts.push(`min loss %=${a.minLossPercent}`);
+      if (a.limit) parts.push(`limit=${a.limit}`);
+      return parts.join(" · ") || undefined;
+    }
+    case "get_realized_gains_losses":
+    case "get_trade_history": {
+      const parts: string[] = [];
+      if (a.year) parts.push(`year=${a.year}`);
+      if (a.action) parts.push(`action=${a.action}`);
+      if (a.cusip) parts.push(`CUSIP=${a.cusip}`);
+      if (a.limit) parts.push(`limit=${a.limit}`);
+      return parts.join(" · ") || undefined;
+    }
+    case "get_call_maturity_schedule":
+    case "get_cash_flow_projection": {
+      const parts: string[] = [];
+      if (a.months) parts.push(`${a.months} months`);
+      if (a.bucket) parts.push(`bucket=${a.bucket}`);
+      return parts.join(" · ") || undefined;
+    }
+    case "get_performance_vs_benchmark": {
+      return a.periods ? `periods=${a.periods}` : undefined;
+    }
+    case "run_rate_spread_scenario": {
+      const parts: string[] = [];
+      if (a.scenarioId) parts.push(`scenario=${a.scenarioId}`);
+      if (a.rateShockBp != null) parts.push(`rates=${a.rateShockBp}bp`);
+      if (a.spreadShockBp != null) parts.push(`spreads=${a.spreadShockBp}bp`);
+      if (a.groupBy) parts.push(`by=${a.groupBy}`);
+      return parts.join(" · ") || undefined;
     }
     default:
       return undefined;

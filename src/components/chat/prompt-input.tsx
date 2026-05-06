@@ -48,7 +48,7 @@ export function PromptInput({ onSubmit, onStop, streaming, disabled, notice }: P
             }
           }}
           disabled={disabled}
-          placeholder="Ask about yield, duration, allocation, holdings..."
+          placeholder="Ask for a chart of states, sectors, ratings, or yields..."
           rows={1}
           className="min-h-[28px] max-h-40 flex-1 resize-none border-0 bg-transparent py-2 text-sm leading-6 text-[var(--color-fg)] placeholder:text-[var(--color-fg-dim)] focus:outline-none disabled:cursor-not-allowed"
         />
