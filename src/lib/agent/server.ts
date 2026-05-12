@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { SDKAgent, SDKMessage, Run } from "@cursor/sdk";
+import type { ModelListItem, SDKAgent, SDKMessage, Run } from "@cursor/sdk";
 import { RenderSpecByName, isRenderToolName, type RenderToolName } from "../render-schemas";
 import type { AgentStreamEvent } from "../types";
 import { initializeSdkNetwork } from "./network";
@@ -8,7 +8,7 @@ import { buildPrompt } from "./system-prompt";
 const WORKSPACE = path.resolve(process.cwd(), ".workspace");
 const MCP_SERVER_ENTRY = path.resolve(process.cwd(), "src/lib/mcp/server.ts");
 const TSX_CLI_ENTRY = path.resolve(process.cwd(), "node_modules/tsx/dist/cli.mjs");
-const MODEL_ID = process.env.CURSOR_MODEL ?? "composer-2";
+export const DEFAULT_MODEL_ID = process.env.CURSOR_MODEL ?? "composer-2";
 const normalizedToolCalls = new Map<string, { name: string; args: unknown }>();
 let cursorSdk: Promise<typeof import("@cursor/sdk")> | undefined;
 
@@ -30,7 +30,10 @@ declare global {
 const sessionCache = (globalThis.__PORTFOLIO_AGENT_CACHE__ ??= sessions);
 const runRegistry = (globalThis.__PORTFOLIO_ACTIVE_RUNS__ ??= activeRuns);
 
-export async function getOrCreateAgent(sessionId: string): Promise<Session> {
+export async function getOrCreateAgent(
+  sessionId: string,
+  modelId: string,
+): Promise<Session> {
   const existing = sessionCache.get(sessionId);
   if (existing) return existing;
 
@@ -44,7 +47,7 @@ export async function getOrCreateAgent(sessionId: string): Promise<Session> {
     const agent = await Agent.create({
       apiKey,
       name: `Portfolio analyst ${sessionId.slice(0, 6)}`,
-      model: { id: MODEL_ID },
+      model: { id: modelId },
       local: { cwd: WORKSPACE },
       mcpServers: {
         portfolio: {
@@ -67,18 +70,30 @@ export async function getOrCreateAgent(sessionId: string): Promise<Session> {
   }
 }
 
+export async function listModels(): Promise<ModelListItem[]> {
+  const apiKey = process.env.CURSOR_API_KEY;
+  if (!apiKey) {
+    throw new Error("CURSOR_API_KEY is not set. Add it to .env.local.");
+  }
+  const { Cursor } = await loadCursorSdk();
+  return Cursor.models.list({ apiKey });
+}
+
 export async function streamAgentResponse(
   sessionId: string,
   userMessage: string,
+  modelId: string,
   emit: (event: AgentStreamEvent) => void,
 ): Promise<void> {
   let session: Session | undefined;
   let run: Run | null = null;
 
   try {
-    session = await getOrCreateAgent(sessionId);
+    session = await getOrCreateAgent(sessionId, modelId);
 
-    run = await session.agent.send(buildPrompt(userMessage));
+    run = await session.agent.send(buildPrompt(userMessage), {
+      model: { id: modelId },
+    });
     session.currentRun = run;
     runRegistry.set(sessionId, run);
 

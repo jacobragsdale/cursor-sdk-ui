@@ -1,5 +1,6 @@
 "use client";
 
+import { useModelContext } from "@/components/chat/model-provider";
 import { nanoid } from "@/lib/id";
 import { readAgentStream } from "@/lib/stream/sse-client";
 import type { AgentStreamEvent, AssistantBlock, ChatMessage } from "@/lib/types";
@@ -7,12 +8,37 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageList } from "./message-list";
 import { PromptInput } from "./prompt-input";
 
-const SUGGESTIONS = [
-  "Show a pie chart of the portfolio by state.",
-  "Show a bar chart of muni sectors.",
-  "Show a pie chart of credit ratings.",
-  "Which states have the highest yields? Use a bar chart.",
-  "Show the 10 biggest bonds in a table.",
+const SUGGESTIONS: { label: string; prompt: string }[] = [
+  {
+    label: "Raise cash",
+    prompt:
+      "I need to raise $10M in cash this week without spiking duration or credit risk. Walk me through what you'd sell — and whether we can lean on tax-loss positions to soften the hit.",
+  },
+  {
+    label: "Concentration check",
+    prompt:
+      "Transportation is pushing 27% of the book across MTA, Port Authority, Triborough, NJ Transit, and the toll roads. Show me where it's concentrated and what you'd trim.",
+  },
+  {
+    label: "Rate shock",
+    prompt:
+      "If the long end backs up 100bps, which positions take the biggest hit? Show me the damage and where we're most exposed.",
+  },
+  {
+    label: "Watchlist names",
+    prompt:
+      "Four of our A-rated names are on negative outlook — PA Turnpike, Illinois GO, WA Healthcare, NY Liberty Housing. Are we being paid enough yield to keep holding them, or should we move up in quality?",
+  },
+  {
+    label: "NY tax pickup",
+    prompt:
+      "We're sitting at 67% NY — well above the 50% floor. Is the in-state tax pickup actually worth that much concentration, or should we add out-of-state diversification?",
+  },
+  {
+    label: "Reinvest",
+    prompt:
+      "$5M from a called bond just hit the account. Where would you put it to work given how the book is positioned today — and what sectors would you avoid adding to?",
+  },
 ];
 
 interface ChatPanelProps {
@@ -22,6 +48,7 @@ interface ChatPanelProps {
 const ANALYSIS_CALL_ID = "__analysis__";
 
 export function ChatPanel({ apiKeyConfigured }: ChatPanelProps) {
+  const { selectedId: modelId } = useModelContext();
   const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [streaming, setStreaming] = useState(false);
@@ -60,7 +87,7 @@ export function ChatPanel({ apiKeyConfigured }: ChatPanelProps) {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, message: text.trim() }),
+          body: JSON.stringify({ sessionId, message: text.trim(), modelId }),
           signal: controller.signal,
         });
         if (!res.ok) {
@@ -91,7 +118,7 @@ export function ChatPanel({ apiKeyConfigured }: ChatPanelProps) {
         abortRef.current = null;
       }
     },
-    [sessionId, streaming, apiKeyConfigured],
+    [sessionId, streaming, apiKeyConfigured, modelId],
   );
 
   const stop = useCallback(async () => {
@@ -112,13 +139,16 @@ export function ChatPanel({ apiKeyConfigured }: ChatPanelProps) {
     () =>
       SUGGESTIONS.map((s) => (
         <button
-          key={s}
+          key={s.label}
           type="button"
-          onClick={() => sendMessage(s)}
+          onClick={() => sendMessage(s.prompt)}
           disabled={!apiKeyConfigured || streaming}
-          className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-1.5 text-xs text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="group flex flex-col gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3 text-left transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-3)] disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {s}
+          <span className="text-sm font-medium text-[var(--color-fg)]">{s.label}</span>
+          <span className="line-clamp-2 text-xs leading-5 text-[var(--color-fg-muted)]">
+            {s.prompt}
+          </span>
         </button>
       )),
     [sendMessage, apiKeyConfigured, streaming],
@@ -129,7 +159,9 @@ export function ChatPanel({ apiKeyConfigured }: ChatPanelProps) {
       <div className="min-h-0 flex-1 overflow-hidden">
         {isEmpty ? (
           <EmptyState apiKeyConfigured={apiKeyConfigured}>
-            <div className="flex flex-wrap justify-center gap-2 px-6">{suggestionList}</div>
+            <div className="grid w-full max-w-3xl grid-cols-1 gap-3 px-6 sm:grid-cols-2 lg:grid-cols-3">
+              {suggestionList}
+            </div>
           </EmptyState>
         ) : (
           <MessageList messages={messages} streaming={streaming} />
@@ -168,7 +200,7 @@ function EmptyState({
           Ask the portfolio a question.
         </div>
         <div className="text-sm leading-6 text-[var(--color-fg-muted)]">
-          Try a simple chart: state mix, muni sectors, credit ratings, yields, or biggest bonds.
+          Ask about state mix, sector exposure, credit quality, yields, or your biggest holdings.
         </div>
       </div>
       {!apiKeyConfigured && (

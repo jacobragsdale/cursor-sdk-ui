@@ -1,4 +1,8 @@
-import { cancelActiveRun, streamAgentResponse } from "@/lib/agent/server";
+import {
+  DEFAULT_MODEL_ID,
+  cancelActiveRun,
+  streamAgentResponse,
+} from "@/lib/agent/server";
 import { AUTH_COOKIE_NAME, isValidAuthToken } from "@/lib/auth";
 import { createSseStream } from "@/lib/stream/sse-server";
 import { cookies } from "next/headers";
@@ -9,6 +13,7 @@ export const dynamic = "force-dynamic";
 interface ChatRequest {
   sessionId?: string;
   message?: string;
+  modelId?: string;
 }
 
 export async function POST(request: Request) {
@@ -20,6 +25,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as ChatRequest;
   const sessionId = body.sessionId?.trim();
   const message = body.message?.trim();
+  const modelId = body.modelId?.trim() || DEFAULT_MODEL_ID;
 
   if (!sessionId || !message) {
     return Response.json(
@@ -34,7 +40,7 @@ export async function POST(request: Request) {
     };
     signal.addEventListener("abort", onAbort, { once: true });
     try {
-      await streamAgentResponse(sessionId, message, emit);
+      await streamAgentResponse(sessionId, message, modelId, emit);
     } finally {
       signal.removeEventListener("abort", onAbort);
     }

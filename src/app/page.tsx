@@ -1,12 +1,14 @@
 import { ChatPanel } from "@/components/chat/chat-panel";
+import { ModelPicker } from "@/components/chat/model-picker";
+import { ModelProvider } from "@/components/chat/model-provider";
+import { DEFAULT_MODEL_ID, listModels } from "@/lib/agent/server";
 import { AUTH_COOKIE_NAME, isValidAuthToken } from "@/lib/auth";
 import { logout } from "@/lib/auth-actions";
 import { portfolioSummary } from "@/lib/mcp/data";
 import { formatNumber } from "@/lib/utils";
+import type { ModelListItem } from "@cursor/sdk";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-const MODEL_ID = process.env.CURSOR_MODEL ?? "composer-2";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,15 @@ export default async function Page() {
 
   const summary = portfolioSummary();
   const apiKeyConfigured = Boolean(process.env.CURSOR_API_KEY);
+  let initialModels: ModelListItem[] = [];
+  let initialModelsError: string | undefined;
+  if (apiKeyConfigured) {
+    try {
+      initialModels = await listModels();
+    } catch (err) {
+      initialModelsError = err instanceof Error ? err.message : String(err);
+    }
+  }
   const asOf = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -26,58 +37,63 @@ export default async function Page() {
   }).format(new Date(`${summary.asOf}T00:00:00.000Z`));
 
   return (
-    <main className="flex h-screen flex-col bg-[var(--color-bg)]">
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur">
-        <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-[var(--color-accent)]/35 bg-[var(--color-accent)]/12 text-sm font-semibold text-[var(--color-accent)]">
-                NY
-              </div>
-              <div className="min-w-0 leading-tight">
-                <div className="truncate text-sm font-semibold tracking-tight">
-                  Muni SMA Analyst
+    <ModelProvider
+      apiKeyConfigured={apiKeyConfigured}
+      initialModels={initialModels}
+      initialModelsError={initialModelsError}
+      defaultModelId={DEFAULT_MODEL_ID}
+    >
+      <main className="flex h-screen flex-col bg-[var(--color-bg)]">
+        <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur">
+          <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-[var(--color-accent)]/35 bg-[var(--color-accent)]/12 text-sm font-semibold text-[var(--color-accent)]">
+                  NY
                 </div>
-                <div className="truncate text-[11px] text-[var(--color-fg-dim)]">
-                  NY taxable investor workspace · data as of {asOf}
+                <div className="min-w-0 leading-tight">
+                  <div className="truncate text-sm font-semibold tracking-tight">
+                    Muni SMA Analyst
+                  </div>
+                  <div className="truncate text-[11px] text-[var(--color-fg-dim)]">
+                    NY taxable investor workspace · data as of {asOf}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px]">
-              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1 text-[var(--color-fg-muted)]">
-                {MODEL_ID}
-              </span>
-              <span
-                className={
-                  apiKeyConfigured
-                    ? "rounded-full border border-[var(--color-positive)]/30 bg-[var(--color-positive)]/10 px-2.5 py-1 text-[var(--color-positive)]"
-                    : "rounded-full border border-[var(--color-negative)]/30 bg-[var(--color-negative)]/10 px-2.5 py-1 text-[var(--color-negative)]"
-                }
-              >
-                {apiKeyConfigured ? "Live SDK connected" : "API key missing"}
-              </span>
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1 text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
+              <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                <ModelPicker />
+                <span
+                  className={
+                    apiKeyConfigured
+                      ? "rounded-full border border-[var(--color-positive)]/30 bg-[var(--color-positive)]/10 px-2.5 py-1 text-[var(--color-positive)]"
+                      : "rounded-full border border-[var(--color-negative)]/30 bg-[var(--color-negative)]/10 px-2.5 py-1 text-[var(--color-negative)]"
+                  }
                 >
-                  Sign out
-                </button>
-              </form>
+                  {apiKeyConfigured ? "Live SDK connected" : "API key missing"}
+                </span>
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2.5 py-1 text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </div>
             </div>
+            <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <SummaryMetric label="Market value" value={formatNumber(summary.totalMarketValue, "currency")} />
+              <SummaryMetric label="NY weight" value={formatNumber(summary.nyWeight, "percent", 2)} />
+              <SummaryMetric label="Tax-equiv YTW" value={formatNumber(summary.weightedTaxEquivalentYield, "percent", 2)} />
+              <SummaryMetric label="Duration" value={formatNumber(summary.weightedDuration, "decimal", 2)} />
+            </dl>
           </div>
-          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <SummaryMetric label="Market value" value={formatNumber(summary.totalMarketValue, "currency")} />
-            <SummaryMetric label="NY weight" value={formatNumber(summary.nyWeight, "percent", 2)} />
-            <SummaryMetric label="Tax-equiv YTW" value={formatNumber(summary.weightedTaxEquivalentYield, "percent", 2)} />
-            <SummaryMetric label="Duration" value={formatNumber(summary.weightedDuration, "decimal", 2)} />
-          </dl>
+        </header>
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <ChatPanel apiKeyConfigured={apiKeyConfigured} />
         </div>
-      </header>
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <ChatPanel apiKeyConfigured={apiKeyConfigured} />
-      </div>
-    </main>
+      </main>
+    </ModelProvider>
   );
 }
 
