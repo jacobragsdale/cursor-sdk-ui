@@ -1,19 +1,27 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { dataTools } from "./data-tools";
+import { enabledPacks } from "../../packs.config";
+import { collectRegisteredTools, validatePacks } from "../packs/registry";
 import { renderTools } from "./render-tools";
 
 async function main() {
+  validatePacks(enabledPacks);
+
+  for (const pack of enabledPacks) {
+    if (pack.init) await pack.init();
+  }
+
   const server = new McpServer(
-    { name: "portfolio", version: "0.1.0" },
+    { name: "packs", version: "0.1.0" },
     { capabilities: { tools: {} } },
   );
 
-  for (const tool of dataTools) {
+  const registered = collectRegisteredTools(enabledPacks);
+  for (const { tool, prefixedName } of registered) {
     const hasInputs = Object.keys(tool.inputShape).length > 0;
     server.registerTool(
-      tool.name,
+      prefixedName,
       {
         description: tool.description,
         ...(hasInputs ? { inputSchema: tool.inputShape } : {}),
@@ -45,10 +53,11 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  process.stderr.write("[portfolio-mcp] connected\n");
+  const toolList = registered.map((r) => r.prefixedName).join(", ");
+  process.stderr.write(`[packs-mcp] connected · packs: ${enabledPacks.map((p) => p.id).join(", ")} · tools: ${toolList}\n`);
 }
 
 main().catch((err) => {
-  process.stderr.write(`[portfolio-mcp] fatal: ${String(err)}\n`);
+  process.stderr.write(`[packs-mcp] fatal: ${String(err)}\n`);
   process.exit(1);
 });

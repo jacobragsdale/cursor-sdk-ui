@@ -1,5 +1,6 @@
 "use client";
 
+import { appConfig } from "@/app.config";
 import type { ModelListItem } from "@cursor/sdk";
 import {
   createContext,
@@ -10,7 +11,7 @@ import {
   useState,
 } from "react";
 
-const STORAGE_KEY = "portfolio.modelId";
+const STORAGE_KEY = `${appConfig.id}.modelId`;
 
 interface ModelContextValue {
   models: ModelListItem[];

@@ -84,6 +84,7 @@ function BlockRenderer({ block }: { block: AssistantBlock }) {
       return (
         <ActivityRow
           name={block.name}
+          label={block.label}
           status={block.status}
           summary={block.summary}
         />

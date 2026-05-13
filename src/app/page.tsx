@@ -1,11 +1,14 @@
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { ModelPicker } from "@/components/chat/model-picker";
 import { ModelProvider } from "@/components/chat/model-provider";
+import { appConfig } from "@/app.config";
 import { DEFAULT_MODEL_ID, listModels } from "@/lib/agent/server";
 import { AUTH_COOKIE_NAME, isValidAuthToken } from "@/lib/auth";
 import { logout } from "@/lib/auth-actions";
-import { portfolioSummary } from "@/lib/mcp/data";
-import { formatNumber } from "@/lib/utils";
+import { enabledPacks } from "@/packs.config";
+import type { PackHeaderSummary, SamplePrompt } from "@/lib/packs/types";
+
+const MAX_SAMPLE_PROMPTS = 8;
 import type { ModelListItem } from "@cursor/sdk";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -18,7 +21,10 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const summary = portfolioSummary();
+  const header = await loadHeaderSummary();
+  const samplePrompts: SamplePrompt[] = enabledPacks
+    .flatMap((p) => p.samplePrompts)
+    .slice(0, MAX_SAMPLE_PROMPTS);
   const apiKeyConfigured = Boolean(process.env.CURSOR_API_KEY);
   let initialModels: ModelListItem[] = [];
   let initialModelsError: string | undefined;
@@ -29,12 +35,14 @@ export default async function Page() {
       initialModelsError = err instanceof Error ? err.message : String(err);
     }
   }
-  const asOf = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${summary.asOf}T00:00:00.000Z`));
+  const asOf = header?.asOf
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(`${header.asOf}T00:00:00.000Z`))
+    : null;
 
   return (
     <ModelProvider
@@ -49,14 +57,15 @@ export default async function Page() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="grid size-9 shrink-0 place-items-center rounded-lg border border-[var(--color-accent)]/35 bg-[var(--color-accent)]/12 text-sm font-semibold text-[var(--color-accent)]">
-                  NY
+                  {appConfig.accentInitials}
                 </div>
                 <div className="min-w-0 leading-tight">
                   <div className="truncate text-sm font-semibold tracking-tight">
-                    Muni SMA Analyst
+                    {appConfig.appName}
                   </div>
                   <div className="truncate text-[11px] text-[var(--color-fg-dim)]">
-                    NY taxable investor workspace · data as of {asOf}
+                    {appConfig.subtitle}
+                    {asOf ? ` · data as of ${asOf}` : ""}
                   </div>
                 </div>
               </div>
@@ -81,20 +90,27 @@ export default async function Page() {
                 </form>
               </div>
             </div>
-            <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <SummaryMetric label="Market value" value={formatNumber(summary.totalMarketValue, "currency")} />
-              <SummaryMetric label="NY weight" value={formatNumber(summary.nyWeight, "percent", 2)} />
-              <SummaryMetric label="Tax-equiv YTW" value={formatNumber(summary.weightedTaxEquivalentYield, "percent", 2)} />
-              <SummaryMetric label="Duration" value={formatNumber(summary.weightedDuration, "decimal", 2)} />
-            </dl>
+            {header && header.metrics.length > 0 && (
+              <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {header.metrics.map((m) => (
+                  <SummaryMetric key={m.label} label={m.label} value={m.value} />
+                ))}
+              </dl>
+            )}
           </div>
         </header>
         <div className="min-h-0 flex-1 overflow-hidden">
-          <ChatPanel apiKeyConfigured={apiKeyConfigured} />
+          <ChatPanel apiKeyConfigured={apiKeyConfigured} samplePrompts={samplePrompts} />
         </div>
       </main>
     </ModelProvider>
   );
+}
+
+async function loadHeaderSummary(): Promise<PackHeaderSummary | null> {
+  const pack = enabledPacks[0];
+  if (!pack?.headerSummary) return null;
+  return await pack.headerSummary();
 }
 
 function SummaryMetric({ label, value }: { label: string; value: string }) {

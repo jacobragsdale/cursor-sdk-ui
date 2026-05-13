@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { appConfig } from "@/app.config";
+import { enabledPacks } from "@/packs.config";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Muni SMA Analyst",
-  description: "Cursor SDK municipal SMA analyst with generative UI.",
+  title: appConfig.appName,
+  description: enabledPacks[0]?.description ?? appConfig.subtitle,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -15,6 +15,7 @@ export type AgentStreamEvent =
       kind: "data_tool" | "status" | "task";
       callId?: string;
       name?: string;
+      label?: string;
       status?: "running" | "completed" | "error";
       summary?: string;
     }
@@ -44,6 +45,7 @@ export type AssistantBlock =
       id: string;
       callId?: string;
       name?: string;
+      label?: string;
       status?: "running" | "completed" | "error";
       summary?: string;
     }

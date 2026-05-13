@@ -1,5 +1,8 @@
 import path from "node:path";
 import type { ModelListItem, SDKAgent, SDKMessage, Run } from "@cursor/sdk";
+import { appConfig } from "@/app.config";
+import { enabledPacks } from "@/packs.config";
+import { findToolLabel } from "../packs/registry";
 import { RenderSpecByName, isRenderToolName, type RenderToolName } from "../render-schemas";
 import type { AgentStreamEvent } from "../types";
 import { initializeSdkNetwork } from "./network";
@@ -22,13 +25,13 @@ const activeRuns = new Map<string, Run>();
 
 declare global {
   // eslint-disable-next-line no-var
-  var __PORTFOLIO_AGENT_CACHE__: typeof sessions | undefined;
+  var __PACKS_AGENT_CACHE__: typeof sessions | undefined;
   // eslint-disable-next-line no-var
-  var __PORTFOLIO_ACTIVE_RUNS__: typeof activeRuns | undefined;
+  var __PACKS_ACTIVE_RUNS__: typeof activeRuns | undefined;
 }
 
-const sessionCache = (globalThis.__PORTFOLIO_AGENT_CACHE__ ??= sessions);
-const runRegistry = (globalThis.__PORTFOLIO_ACTIVE_RUNS__ ??= activeRuns);
+const sessionCache = (globalThis.__PACKS_AGENT_CACHE__ ??= sessions);
+const runRegistry = (globalThis.__PACKS_ACTIVE_RUNS__ ??= activeRuns);
 
 export async function getOrCreateAgent(
   sessionId: string,
@@ -46,11 +49,11 @@ export async function getOrCreateAgent(
     const { Agent } = await loadCursorSdk();
     const agent = await Agent.create({
       apiKey,
-      name: `Portfolio analyst ${sessionId.slice(0, 6)}`,
+      name: `${appConfig.appName} ${sessionId.slice(0, 6)}`,
       model: { id: modelId },
       local: { cwd: WORKSPACE },
       mcpServers: {
-        portfolio: {
+        packs: {
           type: "stdio",
           command: process.execPath,
           args: [TSX_CLI_ENTRY, MCP_SERVER_ENTRY],
@@ -177,6 +180,7 @@ function forwardSdkMessage(
         kind: "data_tool",
         callId: tool.callId,
         name: tool.name,
+        label: findToolLabel(enabledPacks, tool.name),
         status: tool.status,
         summary: summarizeToolArgs(tool.name, tool.args),
       });
@@ -357,7 +361,8 @@ function mapLifecycleStatus(status: string): "running" | "completed" | "error" {
 function summarizeToolArgs(name: string, args: unknown): string | undefined {
   if (!args || typeof args !== "object") return undefined;
   const a = args as Record<string, unknown>;
-  switch (name) {
+  const bareName = name.includes("__") ? name.split("__").slice(1).join("__") : name;
+  switch (bareName) {
     case "list_holdings": {
       const parts: string[] = [];
       if (a.sector) parts.push(`sector=${a.sector}`);
